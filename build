@@ -1,0 +1,46 @@
+#!/bin/bash
+export DISPLAY=:0
+chmod o+rw /var/run/docker.sock
+xhost +
+cat > Dockerfile << EOF
+
+FROM maven:3.6.0-jdk-11-slim AS build
+COPY src src
+COPY pom.xml .
+RUN mvn -f pom.xml clean package install
+# FROM openjdk:8-jre
+# COPY --from=build /target /opt/target
+# WORKDIR /opt/target
+# RUN apt-get update -y; apt-get install -y icedtea-netx
+ENV DISPLAY=:0
+
+# en mac 
+# /private/tmp/com.apple.launchd.5gQS8u4qqJ/org.xquartz:0
+#ENV DISPLAY="/private/tmp/com.apple.launchd.5gQS8u4qqJ/org.xquartz:0"
+
+
+#ENTRYPOINT ["java", "-classpath", ".:/Users/xmen/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/9.2.1.jre8", "-jar", "SqlServerSample-1.0.0.jar"]
+#mvn -q exec:java "-Dexec.mainClass=com.sqlsamples.App"
+ENTRYPOINT ["mvn", "-q", "exec:java", "-Dexec.mainClass=com.sqlsamples.App"]
+
+EOF
+
+docker build -t app:latest . 
+docker run --rm \
+	--name appJAVA \
+	-h FRANK_APP \
+	-e 'DISPLAY:"$DISPLAY"' \
+	-v /tmp/.X11-unix:/tmp/.X11-unix app:latest
+
+
+#	-v /tmp/.X11-unix:/tmp/.X11-unix app:latest
+
+# en mac
+# /private/tmp/com.apple.launchd.5gQS8u4qqJ/org.xquartz:0
+
+#	-e 'DISPLAY:"$DISPLAY"' \
+#	-v /tmp/.X11-unix:/tmp/.X11-unix app:latest
+#	app:latest
+
+
+exit 0;

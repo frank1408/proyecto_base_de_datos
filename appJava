@@ -1,0 +1,12 @@
+#!/bin/bash
+export DISPLAY=:0
+chmod o+rw /var/run/docker.sock
+xhost +
+
+docker run --rm \
+	--name appJAVA \
+	-h FRANK_APP \
+	-e 'DISPLAY:"$DISPLAY"' \
+	-v /tmp/.X11-unix:/tmp/.X11-unix app:latest
+
+exit 0;
